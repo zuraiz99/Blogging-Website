@@ -4,12 +4,10 @@ on:
   pull_request:
     branches:
       - develop
-      - main
 
 jobs:
   lint:
-    runs-on: ubuntu-latest  # Specifies the Ubuntu runner
-    
+    runs-on: ubuntu-latest
     steps:
       # Step 1: Checkout the code
       - uses: actions/checkout@v3
@@ -18,7 +16,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '16'  # You can change this to a higher version if needed.
+          node-version: '16' # You can use a higher version if you need.
 
       # Step 3: Install dependencies (HTMLHint, Stylelint, etc.)
       - name: Install dependencies
@@ -28,10 +26,33 @@ jobs:
       # Step 4: Lint HTML files
       - name: Lint HTML
         run: |
-          npx htmlhint "src/**/*.html"  # Adjust the path based on your project structure
+          npx htmlhint "src/**/*.html"
 
       # Step 5: Lint CSS files
       - name: Lint CSS
         run: |
-          npx stylelint "styles/**/*.css"  # Adjust the path based on your project structure
+          npx stylelint "styles/**/*.css"
 
+  build:
+    runs-on: ubuntu-latest
+    needs: lint # Ensures lint job must pass before this one
+
+    steps:
+      # Step 1: Checkout the code
+      - uses: actions/checkout@v3
+
+      # Step 2: Setup Node.js (required for Parcel)
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      # Step 3: Install dependencies (Parcel)
+      - name: Install dependencies
+        run: |
+          npm install parcel
+
+      # Step 4: Build the static website using Parcel
+      - name: Build project
+        run: |
+          npx parcel build src/index.html --dist-dir build
